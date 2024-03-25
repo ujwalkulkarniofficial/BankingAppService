@@ -25,7 +25,7 @@ public class TransactionsService {
         account.setBalance(account.getBalance() + amount);
         Transaction txn = new Transaction();
         txn.setAmount(amount);
-        txn.setRecipientAccount(account);
+        txn.setAccount(account);
         txn.setTransactionType(TransactionType.CREDIT);
         txn.setRemarks(remarks);
         return transactionRepository.saveAndFlush(txn);
@@ -36,7 +36,7 @@ public class TransactionsService {
         account.setBalance(account.getBalance() - amount);
         Transaction txn = new Transaction();
         txn.setAmount(amount);
-        txn.setRecipientAccount(account);
+        txn.setAccount(account);
         txn.setTransactionType(TransactionType.DEBIT);
         txn.setRemarks(remarks);
         return transactionRepository.saveAndFlush(txn);
@@ -44,7 +44,7 @@ public class TransactionsService {
 
     public List<Transaction> getAllTransaction(UUID accountId) throws ResourceNotFoundException {
         Account account = accountDetailsService.getAccountById(accountId);
-        List<Transaction> transactionList = transactionRepository.findByRecipientAccountOrderByTransactionTimestampDesc(account);
+        List<Transaction> transactionList = transactionRepository.findByAccountOrderByTransactionTimestampDesc(account);
         return transactionList;
     }
 

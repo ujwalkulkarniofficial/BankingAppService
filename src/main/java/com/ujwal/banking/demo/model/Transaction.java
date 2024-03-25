@@ -21,12 +21,8 @@ public class Transaction {
     private Instant transactionTimestamp;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "sender_account_id", unique = false)
-    private Account senderAccount;
-
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "recipient_account_id", unique = false)
-    private Account recipientAccount;
+    @JoinColumn(name = "account_id", unique = false)
+    private Account account;
 
     @Column(name = "amount", nullable = false)
     private double amount;
