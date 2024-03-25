@@ -13,12 +13,8 @@ import java.util.List;
 @RequestMapping("/api/v1/users")
 public class UserController {
 
-
-
     @Autowired
     UserInfoService userInfoService;
-
-
 
     @GetMapping("/getAllUsers")
     public List<User> getAllUsers() {

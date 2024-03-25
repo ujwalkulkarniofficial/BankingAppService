@@ -25,15 +25,26 @@ public class AuthController {
     UserAuthorizationService userAuthorizationService;
 
     @PostMapping("/register")
-    public ResponseEntity registerUser(@Valid @RequestBody User user) {
+    public ResponseEntity registerNewUserWithAccount(@Valid @RequestBody User user) {
         try{
-            var ret = userRegistrationService.registerNewUser(user);
+            var ret = userRegistrationService.registerNewUserWithAccount(user);
             return ResponseEntity.ok().body(ret);
         } catch (Exception e){
             String msg = e.getMessage().contains("unique constraint \"uniqueuser\"") ? "User already exists" : e.getMessage();
             return ResponseEntity.internalServerError().body(msg);
         }
 
+    }
+
+    @PostMapping("/createUser")
+    public ResponseEntity createUser(@Valid @RequestBody User user) {
+        try{
+            var ret = userRegistrationService.registerNewUserWithAccount(user);
+            return ResponseEntity.ok().body(ret);
+        } catch (Exception e){
+            String msg = e.getMessage().contains("unique constraint \"uniqueuser\"") ? "User already exists" : e.getMessage();
+            return ResponseEntity.internalServerError().body(msg);
+        }
     }
 
     @PostMapping("/login")

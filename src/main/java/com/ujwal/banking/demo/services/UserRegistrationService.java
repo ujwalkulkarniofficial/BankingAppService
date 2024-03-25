@@ -16,12 +16,18 @@ public class UserRegistrationService {
     @Autowired
     AccountDetailsService accountDetailsService;
 
-    public User registerNewUser(User user) {
+    public User registerNewUserWithAccount(User user) {
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         var ret = userRepository.saveAndFlush(user);
         accountDetailsService.createNewAccount(user);
         return ret;
     }
+
+    public User registerNewUser(User user) {
+        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+        return userRepository.saveAndFlush(user);
+    }
+
 
 
 }

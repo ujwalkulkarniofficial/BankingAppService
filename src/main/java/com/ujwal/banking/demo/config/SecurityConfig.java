@@ -1,19 +1,23 @@
 package com.ujwal.banking.demo.config;
 
-import com.ujwal.banking.demo.repository.UserRepository;
+import com.ujwal.banking.demo.filter.JwtAuthFilter;
+import com.ujwal.banking.demo.services.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,15 +29,11 @@ public class SecurityConfig {
     // User Creation
 
     @Autowired
-    UserRepository userRepository;
-    @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder encoder) {
+    private JwtAuthFilter authFilter;
 
-        List<UserDetails> userList = userRepository.findAll().stream().map(el-> User.withUsername(el.getUsername())
-                .password(el.getPassword())
-                .roles("USER")
-                .build()).collect(Collectors.toList());
-        return new InMemoryUserDetailsManager(userList);
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return new UserInfoService();
     }
 
     // Configuring HttpSecurity
@@ -44,8 +44,14 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                 .and()
                 .authorizeHttpRequests().requestMatchers("/api/**").authenticated()
-                .and().cors().and().httpBasic()
-                .and().build();
+                .and().cors()
+                .and()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 
 
@@ -55,4 +61,16 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsService());
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        return authenticationProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
 }
